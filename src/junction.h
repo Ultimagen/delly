@@ -59,22 +59,22 @@ namespace torali
   template<typename TReadBp>
   inline void
     _insertJunction(TReadBp& readBp, std::size_t const seed, bam1_t* rec, int32_t const rp, int32_t const sp, bool const scleft) {
-    bool fw = true;
-    if (rec->core.flag & BAM_FREVERSE) fw = false;
-    int32_t readStart = rec->core.pos;
-    if (rec->core.flag & (BAM_FQCFAIL | BAM_FDUP | BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) readStart = -1;
-    typedef typename TReadBp::mapped_type TJunctionVector;
-    typename TReadBp::iterator it = readBp.find(seed);
-    int32_t seqlen = readLength(rec);
-    if (sp <= seqlen) {
-      if (rec->core.flag & BAM_FREVERSE) {
-	if (it != readBp.end()) it->second.push_back(Junction(fw, scleft, rec->core.tid, readStart, rp, seqlen - sp, rec->core.qual));
-	else readBp.insert(std::make_pair(seed, TJunctionVector(1, Junction(fw, scleft, rec->core.tid, readStart, rp, seqlen - sp, rec->core.qual))));
-      } else {
-	if (it != readBp.end()) it->second.push_back(Junction(fw, scleft, rec->core.tid, readStart, rp, sp, rec->core.qual));
-	else readBp.insert(std::make_pair(seed, TJunctionVector(1, Junction(fw, scleft, rec->core.tid, readStart, rp, sp, rec->core.qual))));
-      }
-    }
+		bool fw = true;
+		if (rec->core.flag & BAM_FREVERSE) fw = false;
+		int32_t readStart = rec->core.pos;
+		if (rec->core.flag & (BAM_FQCFAIL | BAM_FDUP | BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY)) readStart = -1;
+		typedef typename TReadBp::mapped_type TJunctionVector;
+		typename TReadBp::iterator it = readBp.find(seed);
+		int32_t seqlen = readLength(rec);
+		if (sp <= seqlen) {
+		  if (rec->core.flag & BAM_FREVERSE) {
+			if (it != readBp.end()) it->second.push_back(Junction(fw, scleft, rec->core.tid, readStart, rp, seqlen - sp, rec->core.qual));
+			else readBp.insert(std::make_pair(seed, TJunctionVector(1, Junction(fw, scleft, rec->core.tid, readStart, rp, seqlen - sp, rec->core.qual))));
+		  } else {
+			  if (it != readBp.end()) it->second.push_back(Junction(fw, scleft, rec->core.tid, readStart, rp, sp, rec->core.qual));
+			  else readBp.insert(std::make_pair(seed, TJunctionVector(1, Junction(fw, scleft, rec->core.tid, readStart, rp, sp, rec->core.qual))));
+		  }
+		}
   }
 
   template<typename TJunction>
@@ -229,47 +229,47 @@ namespace torali
   selectTranslocations(TConfig const& c, TReadBp const& readBp, std::vector<std::vector<SRBamRecord> >& br) {
     for(typename TReadBp::const_iterator it = readBp.begin(); it != readBp.end(); ++it) {
       if (it->second.size() > 1) {
-	for(uint32_t i = 0; i < it->second.size(); ++i) {
-	  for(uint32_t j = i+1; j < it->second.size(); ++j) {
-	    if ((uint32_t) (it->second[j].seqpos - it->second[i].seqpos) > c.maxReadSep) break;
-	    // Different chr
-	    if (it->second[j].refidx != it->second[i].refidx) {
-	      int32_t chr1ev = j;
-	      int32_t chr2ev = i;
-	      if (it->second[i].refidx < it->second[j].refidx) {
-		chr1ev = i;
-		chr2ev = j;
-	      }
-	      int32_t rst = it->second[i].rstart;
-	      if (rst == -1) rst = it->second[j].rstart;
-	      // Avg. qval
-	      int32_t qval = (int32_t) (((int32_t) it->second[i].qual + (int32_t) it->second[j].qual) / 2);
-	      if (it->second[chr1ev].forward == it->second[chr2ev].forward) {
-		// Same direction, opposing soft-clips
-		if (it->second[chr1ev].scleft != it->second[chr2ev].scleft) {
-		  if (it->second[chr1ev].scleft) {
-		    // 3to5
-		    br[DELLY_SVT_TRANS + 2].push_back(SRBamRecord(it->second[chr2ev].refidx, it->second[chr2ev].refpos, it->second[chr1ev].refidx, it->second[chr1ev].refpos, rst, std::min(it->second[j].seqpos, it->second[i].seqpos), qval, std::abs(it->second[j].seqpos - it->second[i].seqpos), it->first));
-		  } else {
-		    // 5to3
-		    br[DELLY_SVT_TRANS + 3].push_back(SRBamRecord(it->second[chr2ev].refidx, it->second[chr2ev].refpos, it->second[chr1ev].refidx, it->second[chr1ev].refpos, rst, std::min(it->second[j].seqpos, it->second[i].seqpos), qval, std::abs(it->second[j].seqpos - it->second[i].seqpos), it->first));
+		for(uint32_t i = 0; i < it->second.size(); ++i) {
+		  for(uint32_t j = i+1; j < it->second.size(); ++j) {
+			if ((uint32_t) (it->second[j].seqpos - it->second[i].seqpos) > c.maxReadSep) break;
+			// Different chr
+			if (it->second[j].refidx != it->second[i].refidx) {
+			  int32_t chr1ev = j;
+			  int32_t chr2ev = i;
+			  if (it->second[i].refidx < it->second[j].refidx) {
+				chr1ev = i;
+				chr2ev = j;
+			  }
+			  int32_t rst = it->second[i].rstart;
+			  if (rst == -1) rst = it->second[j].rstart;
+			  // Avg. qval
+			  int32_t qval = (int32_t) (((int32_t) it->second[i].qual + (int32_t) it->second[j].qual) / 2);
+			  if (it->second[chr1ev].forward == it->second[chr2ev].forward) {
+			// Same direction, opposing soft-clips
+			if (it->second[chr1ev].scleft != it->second[chr2ev].scleft) {
+			  if (it->second[chr1ev].scleft) {
+				// 3to5
+				br[DELLY_SVT_TRANS + 2].push_back(SRBamRecord(it->second[chr2ev].refidx, it->second[chr2ev].refpos, it->second[chr1ev].refidx, it->second[chr1ev].refpos, rst, std::min(it->second[j].seqpos, it->second[i].seqpos), qval, std::abs(it->second[j].seqpos - it->second[i].seqpos), it->first));
+			  } else {
+				// 5to3
+				br[DELLY_SVT_TRANS + 3].push_back(SRBamRecord(it->second[chr2ev].refidx, it->second[chr2ev].refpos, it->second[chr1ev].refidx, it->second[chr1ev].refpos, rst, std::min(it->second[j].seqpos, it->second[i].seqpos), qval, std::abs(it->second[j].seqpos - it->second[i].seqpos), it->first));
+			  }
+			}
+			  } else {
+			// Opposing direction, same soft-clips
+			if (it->second[chr1ev].scleft == it->second[chr2ev].scleft) {
+			  if (it->second[chr1ev].scleft) {
+				// 5to5
+				br[DELLY_SVT_TRANS + 1].push_back(SRBamRecord(it->second[chr2ev].refidx, it->second[chr2ev].refpos, it->second[chr1ev].refidx, it->second[chr1ev].refpos, rst, std::min(it->second[j].seqpos, it->second[i].seqpos), qval, std::abs(it->second[j].seqpos - it->second[i].seqpos), it->first));
+			  } else {
+				// 3to3
+				br[DELLY_SVT_TRANS + 0].push_back(SRBamRecord(it->second[chr2ev].refidx, it->second[chr2ev].refpos, it->second[chr1ev].refidx, it->second[chr1ev].refpos, rst, std::min(it->second[j].seqpos, it->second[i].seqpos), qval, std::abs(it->second[j].seqpos - it->second[i].seqpos), it->first));
+			  }
+			}
+			  }
+			}
 		  }
 		}
-	      } else {
-		// Opposing direction, same soft-clips
-		if (it->second[chr1ev].scleft == it->second[chr2ev].scleft) {
-		  if (it->second[chr1ev].scleft) {
-		    // 5to5
-		    br[DELLY_SVT_TRANS + 1].push_back(SRBamRecord(it->second[chr2ev].refidx, it->second[chr2ev].refpos, it->second[chr1ev].refidx, it->second[chr1ev].refpos, rst, std::min(it->second[j].seqpos, it->second[i].seqpos), qval, std::abs(it->second[j].seqpos - it->second[i].seqpos), it->first));
-		  } else {
-		    // 3to3
-		    br[DELLY_SVT_TRANS + 0].push_back(SRBamRecord(it->second[chr2ev].refidx, it->second[chr2ev].refpos, it->second[chr1ev].refidx, it->second[chr1ev].refpos, rst, std::min(it->second[j].seqpos, it->second[i].seqpos), qval, std::abs(it->second[j].seqpos - it->second[i].seqpos), it->first));
-		  }
-		}
-	      }
-	    }
-	  }
-	}
       }
     }
   }
@@ -591,6 +591,10 @@ namespace torali
     sam_close(samfile);
   }
 
+  inline void
+  outputSingleSV(StructuralVariantRecord const& sv) {
+	  std::cerr << sv.chr << '\t' << sv.svStart << '\t' << sv.chr2 << '\t' << sv.svEnd << '\t' << _addID(sv.svt) << '\t' << _addOrientation(sv.svt) << '\t' << sv.peSupport << '\t' << sv.srSupport << '\t' << sv.consensus << std::endl;
+  }
   template<typename TConfig>
   inline void
   outputStructuralVariants(TConfig const& c, std::vector<StructuralVariantRecord> const& svs) {

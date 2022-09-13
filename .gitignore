@@ -36,3 +36,8 @@ src/dpe
 *.exe
 *.out
 *.app
+
+# ECLIPSE
+.cproject
+.project
+.settings/

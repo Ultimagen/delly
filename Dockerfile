@@ -39,7 +39,7 @@ RUN \
 
 # install delly
 RUN cd /opt \
-    && git clone --recursive git@github.com:Ultimagen/delly-private.git delly \
+    && git clone --recursive git@github.com:Ultimagen/delly.git delly \
     && cd /opt/delly/ \
     && make STATIC=1 all \
     && make install
